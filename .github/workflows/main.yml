@@ -78,6 +78,12 @@ jobs:
           else
             pnpm version patch --no-git-tag-version
           fi
+
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN is not configured, skipping npm publish."
+            exit 0
+          fi
+
           npm config set //registry.npmjs.org/:_authToken ${NODE_AUTH_TOKEN}
           npm publish --access public
         env:

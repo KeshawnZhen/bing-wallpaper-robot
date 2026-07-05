@@ -52,6 +52,10 @@ jobs:
           QINIU_SECRET_KEY: '${{ secrets.QINIU_SECRET_KEY }}'
           QINIU_BUCKET: '${{ secrets.QINIU_BUCKET }}'
           QINIU_ZONE: '${{ secrets.QINIU_ZONE }}'
+          # NAS Chevereto 同步（可选）：未配置对应 Secrets 时优雅跳过，不影响采集
+          CHEVERETO_API_URL: '${{ secrets.CHEVERETO_API_URL }}'
+          CHEVERETO_API_KEY: '${{ secrets.CHEVERETO_API_KEY }}'
+          CHEVERETO_ALBUM_ID: '${{ secrets.CHEVERETO_ALBUM_ID }}'
         # 根据你老版本的配置，这里你使用的是 npm 或 pnpm 运行 fetch-data
         run: pnpm run fetch-data
 

@@ -18,6 +18,7 @@ import isSimilarImage, { colorHistDist } from './is-similar-image';
 import uploadToImagekit from './upload-to-imagekit';
 import { downloadTo } from './download-thumbnail';
 import backupToQiniu from './upload-to-qiniu';
+import uploadToNas from './upload-to-nas';
 
 const SSIM_THRESHOLD = 0.85;
 
@@ -411,6 +412,22 @@ ${JSON.stringify(wallpaperBingData, null, 2)}
     } catch (qiniuError) {
       console.log(`>>> [STAGE.6] >> 七牛冷备份异常（已忽略）：${qiniuError}`);
     }
+
+    // [STAGE.7] >> 同步 UHD 原图至 NAS Chevereto（best-effort，永不阻断主流程）
+    console.log(`>>> [STAGE.7] >> 同步 UHD 原图至 NAS Chevereto（best-effort）...`);
+    try {
+      const nasResult = await uploadToNas(wallpaperFilename, {
+        title: wallpaper.title,
+        tags: ['bing-wallpaper', String(wallpaper.date), langEnum[wallpaper.lang]],
+      });
+      if (nasResult.status === 'uploaded') {
+        console.log(`>>> [STAGE.7] >> NAS Chevereto 同步完成：${nasResult.url || nasResult.key}`);
+      } else if (nasResult.status === 'error') {
+        console.log(`>>> [STAGE.7] >> NAS Chevereto 同步失败（已忽略）：${nasResult.reason}`);
+      }
+    } catch (nasError) {
+      console.log(`>>> [STAGE.7] >> NAS Chevereto 同步异常（已忽略）：${nasError}`);
+    }
   } else {
     // * ----------------
     // * >>> 更新 <<<
@@ -560,10 +577,7 @@ ${JSON.stringify(wallpaperBingData, null, 2)}
       if (colorHistJson !== null) {
         updateData.colorHist = colorHistJson;
       }
-      await analyticsRepository.update(
-        get(nextWallpaper, ['analytics', 'id']),
-        pickBy(updateData, identity),
-      );
+      await analyticsRepository.update(get(nextWallpaper, ['analytics', 'id']), pickBy(updateData, identity));
 
       // 依据壁纸`imagekit.id`，已经存在时，持久化存储缩略图，否则删除临时图片
       if (isString(get(nextWallpaper, ['imagekit', 'id']))) {

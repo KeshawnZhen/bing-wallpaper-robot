@@ -1,0 +1,1 @@
+export default [["OHR.OlmstedPoint_EN-US0964858045",20261001,"Reading time in granite","Sunset from Olmsted Point, Yosemite National Park, California, USA (© Robb Hirsch/Tandem Stills + Motion)","966c69"]];
